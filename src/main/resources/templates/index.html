@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <style>
+        body {
+            padding: 20px;
+        }
+        .repo-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: box-shadow 0.3s ease;
+        }
+        .repo-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .repo-card h3 {
+            margin-bottom: 10px;
+        }
+        .repo-card a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+        .repo-card a:hover {
+            text-decoration: underline;
+        }
+        .repo-meta {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        .executive-summary-placeholder {
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 10px;
+        }
+        .empty-state {
+            background-color: #e7f3ff;
+            border: 2px dashed #0d6efd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            color: #0d6efd;
+            margin-bottom: 30px;
+        }
+        .track-new-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #dee2e6;
+        }
+    </style>
+
+    <title>GitHub Repo Tracker!</title>
+</head>
+<body>
+
+<div class="container">
+    <h1>GitHub Repo Tracker!</h1>
+
+    <!-- Flash messages -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- Tracked Repositories List -->
+    <div class="tracked-repos-section mt-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <h2 class="mb-0">Tracked Repositories</h2>
+
+            <!-- Refresh All form shown only when there are tracked repos -->
+            <div th:if="${!#lists.isEmpty(trackedRepos)}">
+                <form th:action="@{/refresh-all}" method="post" style="display:inline-block;">
+                    <button type="submit" class="btn btn-sm btn-secondary">Refresh All</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(trackedRepos)}" class="empty-state">
+            <p class="mb-0"><strong>No repositories tracked yet.</strong> Use the form below to track your first repository!</p>
+        </div>
+
+        <!-- Repository Cards -->
+        <div th:if="${!#lists.isEmpty(trackedRepos)}">
+            <div th:each="repo : ${trackedRepos}" class="repo-card">
+                <h3>
+                    <a th:href="@{/track{path}(path=${repo.repoPath})}" th:text="${repo.repoPath}">Repository Path</a>
+                </h3>
+                <div class="repo-meta">
+                    <strong>Last Updated:</strong>
+                    <span th:text="${#temporals.format(repo.updatedAt, 'MMM dd, yyyy ''at'' h:mm a')}">Date</span>
+                </div>
+                <div class="executive-summary-placeholder" th:utext="${markdownHelper.toSafeHtml(repo.prSummary)}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Track New Repository Form -->
+    <div class="track-new-section">
+        <h2>Track a New Repository</h2>
+        <form th:action="@{/track}" method="post">
+            <div class="mb-3">
+                <label for="repoUrl" class="form-label">GitHub Repository URL</label>
+                <input type="url" class="form-control" id="repoUrl" name="repoUrl" placeholder="Put your GitHub repo URL name here">
+            </div>
+            <button type="submit" class="btn btn-primary">Track Repo</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+</body>
+</html>
